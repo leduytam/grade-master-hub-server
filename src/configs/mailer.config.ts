@@ -48,7 +48,7 @@ class EnvironmentVariablesValidator {
   MAILER_REQUIRE_TLS: boolean;
 }
 
-export default registerAs<IMailerConfig>('mailer', () => {
+export default registerAs<IMailerConfig>('mailer', (): IMailerConfig => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {

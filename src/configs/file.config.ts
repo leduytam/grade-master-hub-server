@@ -39,7 +39,7 @@ class EnvironmentVariablesValidator {
   CLOUDINARY_API_SECRET: string;
 }
 
-export default registerAs<IFileConfig>('file', () => {
+export default registerAs<IFileConfig>('file', (): IFileConfig => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   const driver = process.env.FILE_DRIVER || EFileDriver.LOCAL;

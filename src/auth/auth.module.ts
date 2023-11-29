@@ -10,6 +10,8 @@ import { UserVerificationTokensModule } from 'src/models/user-verification-token
 import { UsersModule } from 'src/models/users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { FacebookStrategy } from './strategies/facebook.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -23,6 +25,8 @@ import { LocalStrategy } from './strategies/local.strategy';
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
+    GoogleStrategy,
+    FacebookStrategy,
   ],
   imports: [
     UsersModule,

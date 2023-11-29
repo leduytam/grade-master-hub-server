@@ -28,6 +28,17 @@ declare global {
       DB_KEY?: string;
       DB_CERT?: string;
 
+      AUTH_JWT_SECRET?: string;
+      AUTH_JWT_TOKEN_EXPIRES_IN?: string;
+      AUTH_REFRESH_SECRET?: string;
+      AUTH_REFRESH_TOKEN_EXPIRES_IN?: string;
+      AUTH_VERIFY_EMAIL_EXPIRES_IN?: string;
+      AUTH_RESET_PASSWORD_EXPIRES_IN?: string;
+      AUTH_GOOGLE_CLIENT_ID?: string;
+      AUTH_GOOGLE_CLIENT_SECRET?: string;
+      AUTH_FACEBOOK_CLIENT_ID?: string;
+      AUTH_FACEBOOK_CLIENT_SECRET?: string;
+
       MAILER_PORT?: string;
       MAILER_HOST?: string;
       MAILER_USER?: string;

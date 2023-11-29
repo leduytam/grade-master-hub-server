@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   SerializeOptions,
   UploadedFile,
   UseGuards,
@@ -22,7 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { RegisterDto } from 'src/auth/dto/register.dto';
 import { UpdateMeDto } from 'src/auth/dto/update-me.dto';
 import { IAllConfig } from 'src/configs/types/config.interface';
@@ -34,6 +35,8 @@ import { LoginDto } from './dto/login.dto';
 import { ResendVerificationEmailDto } from './dto/resend-verification-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { FacebookOAuthGuard } from './guards/facebook-oauth.guard';
+import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 import { JwtGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshJwtGuard } from './guards/refresh-jwt-auth.guard';
@@ -63,6 +66,38 @@ export class AuthController {
   })
   async login(@Req() req: Request): Promise<ILoginResponse> {
     return this.authService.login(req.user);
+  }
+
+  @Get('login/google')
+  @UseGuards(GoogleOAuthGuard)
+  async loginWithGoogle() {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleOAuthGuard)
+  async loginGoogleCallback(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.login(req.user);
+
+    res.redirect(
+      `${this.configService.get('app.clientUrl', {
+        infer: true,
+      })}/auth/login/social/success?result=${JSON.stringify(result)}`,
+    );
+  }
+
+  @Get('login/facebook')
+  @UseGuards(FacebookOAuthGuard)
+  async loginWithFacebook() {}
+
+  @Get('facebook/callback')
+  @UseGuards(FacebookOAuthGuard)
+  async loginFacebookCallback(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.login(req.user);
+
+    res.redirect(
+      `${this.configService.get('app.clientUrl', {
+        infer: true,
+      })}/auth/login/social/success?result=${JSON.stringify(result)}`,
+    );
   }
 
   @Post('register')

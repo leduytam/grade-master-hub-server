@@ -35,6 +35,14 @@ export interface IAuthConfig {
   jwtRefreshExpires: string;
   verifyEmailExpires: string;
   resetPasswordExpires: string;
+  google: {
+    clientId: string;
+    clientSecret: string;
+  };
+  facebook: {
+    clientId: string;
+    clientSecret: string;
+  };
 }
 
 export interface IMailerConfig {
