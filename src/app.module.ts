@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
 import appConfig from './configs/app.config';
+import authConfig from './configs/auth.config';
 import databaseConfig from './configs/database.config';
 import fileConfig from './configs/file.config';
 import mailerConfig from './configs/mailer.config';
@@ -12,12 +14,13 @@ import { HealthModule } from './health/health.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
 import { FilesModule } from './models/files/files.module';
+import { UsersModule } from './models/users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, mailerConfig, databaseConfig, fileConfig],
+      load: [appConfig, databaseConfig, authConfig, mailerConfig, fileConfig],
     }),
     ServeStaticModule.forRootAsync({
       inject: [ConfigService],
@@ -40,6 +43,8 @@ import { FilesModule } from './models/files/files.module';
     MailModule,
     HealthModule,
     FilesModule,
+    AuthModule,
+    UsersModule,
   ],
 })
 export class AppModule {}

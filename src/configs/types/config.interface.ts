@@ -28,6 +28,15 @@ export interface IDatabaseConfig {
   };
 }
 
+export interface IAuthConfig {
+  jwtSecret: string;
+  jwtExpires: string;
+  jwtRefreshSecret: string;
+  jwtRefreshExpires: string;
+  verifyEmailExpires: string;
+  resetPasswordExpires: string;
+}
+
 export interface IMailerConfig {
   port: number;
   host: string;
@@ -55,7 +64,8 @@ export interface IFileConfig {
 
 export interface IAllConfig {
   app: IAppConfig;
-  mailer: IMailerConfig;
   database: IDatabaseConfig;
+  auth: IAuthConfig;
+  mailer: IMailerConfig;
   file: IFileConfig;
 }
