@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
-import { IMailerConfig } from './config.interface';
+import { IMailerConfig } from './types/config.interface';
 
 class EnvironmentVariablesValidator {
   @IsInt()

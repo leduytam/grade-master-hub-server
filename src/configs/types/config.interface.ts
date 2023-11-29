@@ -8,6 +8,26 @@ export interface IAppConfig {
   serverUrl: string;
 }
 
+export interface IDatabaseConfig {
+  url: string;
+  type: string;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  name: string;
+  synchronize: boolean;
+  migrationsRun: boolean;
+  timezone: string;
+  logging: string | boolean;
+  ssl: {
+    rejectUnauthorized: boolean;
+    ca: string;
+    key: string;
+    cert: string;
+  };
+}
+
 export interface IMailerConfig {
   port: number;
   host: string;
@@ -23,4 +43,5 @@ export interface IMailerConfig {
 export interface IAllConfig {
   app: IAppConfig;
   mailer: IMailerConfig;
+  database: IDatabaseConfig;
 }

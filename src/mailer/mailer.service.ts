@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import Handlebars from 'handlebars';
 import * as fs from 'node:fs/promises';
 import * as nodemailer from 'nodemailer';
-import { IAllConfig } from 'src/configs/config.interface';
+import { IAllConfig } from 'src/configs/types/config.interface';
 
 @Injectable()
 export class MailerService {
