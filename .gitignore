@@ -1,9 +1,7 @@
 # Envs
 .env
-.env.test
-.env.production
-.env.development
-.env.local
+.env.*
+*.env
 
 # compiled output
 /dist

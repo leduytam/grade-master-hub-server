@@ -21,6 +21,7 @@ import { UsersModule } from './models/users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, authConfig, mailerConfig, fileConfig],
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
     ServeStaticModule.forRootAsync({
       inject: [ConfigService],

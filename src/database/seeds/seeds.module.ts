@@ -11,6 +11,7 @@ import { VerificationTokenTypesSeedModule } from './verification-token-types/ver
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig],
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
     DatabaseModule,
     VerificationTokenTypesSeedModule,

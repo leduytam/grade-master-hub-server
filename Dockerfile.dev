@@ -5,8 +5,11 @@ WORKDIR /app
 ENV NODE_ENV development
 
 COPY --chown=node:node package.json yarn.lock ./
+COPY --chown=node:node . .
 
 RUN yarn
+
+RUN yarn build
 
 USER node
 

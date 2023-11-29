@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./dev-volumes/db-data:/var/lib/postgresql/data
+      - ./prod-volumes/db-data:/var/lib/postgresql/data
     ports:
       - ${DB_PORT}:5432
     healthcheck:
@@ -18,30 +18,17 @@ services:
       timeout: 5s
       retries: 5
 
-  maildev:
-    image: maildev/maildev
-    container_name: maildev
-    restart: unless-stopped
-    environment:
-      MAILDEV_SMTP_PORT: ${MAILER_PORT}
-    ports:
-      - 1080:1080
-      - ${MAILER_PORT}:${MAILER_PORT}
-
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
+      target: production
     container_name: app
     restart: unless-stopped
-    env_file: .env.development
+    env_file: .env.production
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app
-      - /app/node_modules
-    network_mode: host
 
   pgadmin:
     image: dpage/pgadmin4
@@ -57,7 +44,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./dev-volumes/pgadmin-data:/var/lib/pgadmin
+      - ./prod-volumes/pgadmin-data:/var/lib/pgadmin
 
 volumes:
   db-data:

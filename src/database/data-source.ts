@@ -1,9 +1,11 @@
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-config();
+dotenv.config({
+  path: `.env.${process.env.NODE_ENV || 'development'}`,
+});
 
 export const appDataSource = new DataSource({
   type: process.env.DB_TYPE || 'postgres',
@@ -19,7 +21,7 @@ export const appDataSource = new DataSource({
       : process.env.DB_SYNCHRONIZE === 'true',
   migrationsRun:
     process.env.DB_MIGRATIONS_RUN === undefined
-      ? process.env.NODE_ENV !== 'production'
+      ? process.env.NODE_ENV === 'production'
       : process.env.DB_MIGRATIONS_RUN === 'true',
   dropSchema: false,
   logging: process.env.NODE_ENV !== 'production',
