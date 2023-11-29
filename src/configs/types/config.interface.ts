@@ -40,8 +40,22 @@ export interface IMailerConfig {
   requireTLS: boolean;
 }
 
+export interface IFileConfig {
+  driver: string;
+  maxSize: number;
+  local: {
+    folder: string;
+  };
+  cloudinary: {
+    cloudName: string;
+    apiKey: string;
+    apiSecret: string;
+  };
+}
+
 export interface IAllConfig {
   app: IAppConfig;
   mailer: IMailerConfig;
   database: IDatabaseConfig;
+  file: IFileConfig;
 }
