@@ -41,7 +41,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           overwrite: true
-          source: .env,prod.swarm.yml
+          source: .env.production,prod.swarm.yml
           target: /var/www/grade-master-hub-server
 
       - name: Deploy Stack
