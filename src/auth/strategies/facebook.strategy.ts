@@ -23,7 +23,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientSecret: configService.get('auth.facebook.clientSecret', {
         infer: true,
       }),
-      callbackURL: '/api/v1/auth/facebook/callback',
+      callbackURL: `${configService.get('app.serverUrl', {
+        infer: true,
+      })}/v1/auth/facebook/callback`,
       scope: ['email', 'public_profile'],
     });
   }
