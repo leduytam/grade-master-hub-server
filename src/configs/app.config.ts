@@ -37,7 +37,7 @@ export default registerAs<IAppConfig>('app', (): IAppConfig => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
-    name: process.env.APP_NAME || 'Grade Master Hub Server',
+    name: process.env.APP_NAME || 'Grade Master Hub',
     env: process.env.NODE_ENV || 'development',
     port: process.env.PORT ? +process.env.PORT : 8080,
     apiPrefix: 'api',

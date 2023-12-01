@@ -150,12 +150,19 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    if (!(await bcrypt.compare(user.password, body.oldPassword))) {
-      throw new BadRequestException('Old password is not match');
+    if (!(await bcrypt.compare(body.oldPassword, user.password))) {
+      throw new BadRequestException('Old password does not match');
     }
 
     await this.usersService.updateSave(userId, {
       password: body.newPassword,
+    });
+
+    this.mailService.sendChangedPasswordSuccess({
+      to: user.email,
+      data: {
+        userName: `${user.firstName} ${user.lastName}`,
+      },
     });
 
     return {
@@ -211,6 +218,15 @@ export class AuthService {
         });
       },
     );
+
+    const user = await this.usersService.findOneById(userId);
+
+    this.mailService.sendVerifiedEmailSuccess({
+      to: user.email,
+      data: {
+        userName: `${user.firstName} ${user.lastName}`,
+      },
+    });
 
     return {
       message: 'Email verified successfully',
@@ -280,6 +296,15 @@ export class AuthService {
         });
       },
     );
+
+    const user = await this.usersService.findOneById(userId);
+
+    this.mailService.sendChangedPasswordSuccess({
+      to: user.email,
+      data: {
+        userName: `${user.firstName} ${user.lastName}`,
+      },
+    });
 
     return {
       message: 'Password reset successfully',

@@ -86,4 +86,62 @@ export class MailService {
       },
     });
   }
+
+  async sendVerifiedEmailSuccess(
+    mailData: MailData<{
+      userName: string;
+    }>,
+  ): Promise<void> {
+    const { to, data } = mailData;
+
+    const templatePath = path.join(
+      this.configService.get('app.workingDir', { infer: true }),
+      'src',
+      'mail',
+      'templates',
+      'verified-email-success.hbs',
+    );
+
+    const subject = 'GMH - Verify email success';
+
+    await this.mailerService.sendMail({
+      to,
+      subject,
+      templatePath,
+      context: {
+        title: subject,
+        appName: this.configService.get('app.name', { infer: true }),
+        userName: data.userName,
+      },
+    });
+  }
+
+  async sendChangedPasswordSuccess(
+    mailData: MailData<{
+      userName: string;
+    }>,
+  ): Promise<void> {
+    const { to, data } = mailData;
+
+    const templatePath = path.join(
+      this.configService.get('app.workingDir', { infer: true }),
+      'src',
+      'mail',
+      'templates',
+      'changed-password-success.hbs',
+    );
+
+    const subject = 'GMH - Change password success';
+
+    await this.mailerService.sendMail({
+      to,
+      subject,
+      templatePath,
+      context: {
+        title: subject,
+        appName: this.configService.get('app.name', { infer: true }),
+        userName: data.userName,
+      },
+    });
+  }
 }

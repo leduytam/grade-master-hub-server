@@ -8,17 +8,17 @@
 
   <body style='margin:0;font-family:arial'>
     <table style='border:0;width:100%'>
-      <tr style='background:#eeeeee'>
+      <tr style='background:#1F4172'>
         <td
-          style='padding:20px;color:#808080;text-align:center;font-size:40px;font-weight:600'
+          style='padding:20px;color: #ffffff;text-align:center;font-size:40px;font-weight:600'
         >
           {{appName}}
         </td>
       </tr>
       <tr>
-        <td style='padding:20px;color:#808080;font-size:16px;font-weight:100'>
+        <td style='padding:20px;font-size:16px;font-weight:100'>
           Dear
-          {{userName}},<br />
+          <strong>{{userName}}</strong>,<br /><br />
           Thank you for creating an account with
           {{appName}}. To complete your registration, please verify your email
           address by clicking the button below:
@@ -28,12 +28,12 @@
         <td style='text-align:center'>
           <a
             href='{{url}}'
-            style='display:inline-block;padding:20px;background:#00838f;text-decoration:none;color:#ffffff'
+            style='display:inline-block;padding:20px;background:#132043;text-decoration:none;color:#ffffff'
           >Verify Email Address</a>
         </td>
       </tr>
       <tr>
-        <td style='padding:20px;color:#808080;font-size:16px;font-weight:100'>
+        <td style='padding:20px;font-size:16px;font-weight:100'>
           If you did not create an account with
           {{appName}}, please ignore this email. This verification link will
           expire in
