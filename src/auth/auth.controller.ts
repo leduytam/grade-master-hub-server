@@ -77,6 +77,8 @@ export class AuthController {
   async loginGoogleCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.login(req.user);
 
+    console.log(result);
+
     res.redirect(
       `${this.configService.get('app.clientUrl', {
         infer: true,

@@ -14,7 +14,6 @@ import { UpdateMeDto } from 'src/auth/dto/update-me.dto';
 import { IAllConfig } from 'src/configs/types/config.interface';
 import { MailService } from 'src/mail/mail.service';
 import { UserVerificationTokensService } from 'src/models/user-verification-tokens/user-verification-tokens.service';
-import { EUserProvider } from 'src/models/users/types/user-providers.enum';
 import { EUserStatus } from 'src/models/users/types/user-statuses.enum';
 import { UsersService } from 'src/models/users/users.service';
 import { EVerificationTokenType } from 'src/models/verification-token-types/types/verification-token-types.enum';
@@ -116,12 +115,6 @@ export class AuthService {
     password: string,
   ): Promise<IUserPayload> | null {
     const user = await this.usersService.findOneByEmail(email);
-
-    if (user && user.provider !== EUserProvider.EMAIL) {
-      throw new UnauthorizedException(
-        'This account is registered with a social account. Please login with your social account.',
-      );
-    }
 
     if (user && (await bcrypt.compare(password, user.password))) {
       return {
@@ -264,7 +257,6 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.usersService.findOne({
       email,
-      provider: EUserProvider.EMAIL,
     });
 
     if (user) {
