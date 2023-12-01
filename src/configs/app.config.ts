@@ -43,6 +43,6 @@ export default registerAs<IAppConfig>('app', (): IAppConfig => {
     apiPrefix: 'api',
     workingDir: process.env.PWD || process.cwd(),
     clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
-    serverUrl: process.env.SERVER_URL || 'http://localhost:8080',
+    serverUrl: process.env.SERVER_URL || 'http://localhost:8080/api',
   };
 });

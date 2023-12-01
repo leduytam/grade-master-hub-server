@@ -28,11 +28,11 @@ services:
       - 1080:1080
       - ${MAILER_PORT}:${MAILER_PORT}
 
-  app:
+  server:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: app
+    container_name: server
     restart: unless-stopped
     env_file: .env.development
     depends_on:
