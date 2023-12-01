@@ -13,7 +13,7 @@ import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { AppModule } from './app.module';
-import { IAllConfig } from './configs/config.interface';
+import { IAllConfig } from './configs/types/config.interface';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
