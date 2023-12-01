@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: [feat/GMH-12]
+    branches: [main]
 
 jobs:
   deploy:
