@@ -18,13 +18,13 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
+  server:
     image: registry.digitalocean.com/grade-master-hub/server
     build:
       context: .
       dockerfile: Dockerfile.prod
       target: production
-    container_name: app
+    container_name: server
     restart: unless-stopped
     env_file: .env.production
     depends_on:

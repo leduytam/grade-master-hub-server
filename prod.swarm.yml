@@ -12,7 +12,7 @@ services:
     ports:
       - 5432:5432
 
-  app:
+  server:
     image: registry.digitalocean.com/grade-master-hub/server
     env_file: .env.production
     ports:
