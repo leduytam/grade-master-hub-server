@@ -1,0 +1,49 @@
+#
+# Development Build Stage
+#
+FROM node:20-alpine as development
+
+WORKDIR /app
+
+COPY --chown=node:node package.json yarn.lock ./
+
+RUN yarn --frozen-lockfile
+
+USER node
+
+#
+# Production Build Stage
+#
+FROM node:20-alpine as build
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --chown=node:node --from=development /app/node_modules ./node_modules
+COPY --chown=node:node . .
+
+RUN yarn build
+
+RUN npx --quiet pinst --disable
+RUN yarn --frozen-lockfile --production && yarn cache clean
+
+USER node
+
+#
+# Production Stage
+#
+FROM node:20-alpine as production
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --chown=node:node --from=build /app/node_modules ./node_modules
+COPY --chown=node:node --from=build /app/dist ./dist
+COPY --chown=node:node ./public/templates ./public/templates
+COPY --chown=node:node ./src/mail/templates ./src/mail/templates
+
+USER node
+
+CMD ["sh", "-c", "node dist/database/seeds/seeds && node dist/main.js"]

@@ -1,0 +1,60 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create env file
+        run: |
+          touch .env.production
+          echo "${{ secrets.PROD_ENV }}" > .env.production
+
+      - name: Build image
+        run: docker compose -f docker-compose.prod.yml build
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_CONTAINER_REGISTRY_ACCESS_TOKEN }}
+
+      - name: Login to Digital Ocean Container Registry
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Push image to Digital Ocean Container Registry
+        run: docker compose -f docker-compose.prod.yml push
+
+      - name: Copy .env.production & prod.swarm.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          overwrite: true
+          source: .env.production,prod.swarm.yml
+          target: /var/www/grade-master-hub-server
+
+      - name: Deploy Stack
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            mkdir -p /var/www/grade-master-hub-server
+            mkdir -p /var/www/grade-master-hub-server/prod-volumes
+            mkdir -p /var/www/grade-master-hub-server/prod-volumes/db-data
+            mkdir -p /var/www/grade-master-hub-server/prod-volumes/pgadmin-data
+            cd /var/www/grade-master-hub-server
+            export $(cat .env.production) && docker stack deploy -c prod.swarm.yml grade-master-hub --with-registry-auth
+            rm .env.production prod.swarm.yml
