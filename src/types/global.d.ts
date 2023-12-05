@@ -54,6 +54,11 @@ declare global {
   namespace Express {
     // override Request.User of PassportJS
     // https://stackoverflow.com/questions/74840921/how-do-i-get-rid-of-this-overload-error-when-i-extend-express-request-object/74840966#74840966
-    interface User extends IUserPayload {}
+    interface User extends IUserPayload {
+      error?: {
+        message: string;
+        statusCode: number;
+      };
+    }
   }
 }
