@@ -75,15 +75,23 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleOAuthGuard)
   async loginGoogleCallback(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.login(req.user);
+    const user = req.user;
 
-    console.log(result);
+    if (user.error) {
+      res.redirect(
+        `${this.configService.get('app.clientUrl', {
+          infer: true,
+        })}/auth/login/social/error?error=${JSON.stringify(user.error)}`,
+      );
+    } else {
+      const result = await this.authService.login(user);
 
-    res.redirect(
-      `${this.configService.get('app.clientUrl', {
-        infer: true,
-      })}/auth/login/social/success?result=${JSON.stringify(result)}`,
-    );
+      res.redirect(
+        `${this.configService.get('app.clientUrl', {
+          infer: true,
+        })}/auth/login/social/success?result=${JSON.stringify(result)}`,
+      );
+    }
   }
 
   @Get('login/facebook')
@@ -93,13 +101,23 @@ export class AuthController {
   @Get('facebook/callback')
   @UseGuards(FacebookOAuthGuard)
   async loginFacebookCallback(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.login(req.user);
+    const user = req.user;
 
-    res.redirect(
-      `${this.configService.get('app.clientUrl', {
-        infer: true,
-      })}/auth/login/social/success?result=${JSON.stringify(result)}`,
-    );
+    if (user.error) {
+      res.redirect(
+        `${this.configService.get('app.clientUrl', {
+          infer: true,
+        })}/auth/login/social/error?error=${JSON.stringify(user.error)}`,
+      );
+    } else {
+      const result = await this.authService.login(user);
+
+      res.redirect(
+        `${this.configService.get('app.clientUrl', {
+          infer: true,
+        })}/auth/login/social/success?result=${JSON.stringify(result)}`,
+      );
+    }
   }
 
   @Post('register')
