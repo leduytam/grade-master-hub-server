@@ -21,7 +21,7 @@ jobs:
           echo "${{ secrets.PROD_ENV }}" > .env.production
 
       - name: Build image
-        run: docker compose -f docker-compose.prod.yml build
+        run: docker compose --env-file=.env.production -f docker-compose.prod.yml build
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
