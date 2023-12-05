@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
@@ -60,16 +60,27 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         status: newUser.status,
       });
     } else {
-      if (!user.googleId) {
-        throw new ForbiddenException('You have already used another provider');
-      }
+      console.log(user);
 
-      cb(null, {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-      });
+      if (!user.googleId) {
+        cb(null, {
+          id: '',
+          email: '',
+          role: EUserRole.USER,
+          status: EUserStatus.ACTIVE,
+          error: {
+            message: 'You have already used another provider',
+            statusCode: HttpStatus.FORBIDDEN,
+          },
+        });
+      } else {
+        cb(null, {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+        });
+      }
     }
   }
 }

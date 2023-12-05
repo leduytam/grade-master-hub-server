@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-facebook';
@@ -60,12 +60,25 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
         status: newUser.status,
       });
     } else {
-      cb(null, {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-      });
+      if (!user.facebookId) {
+        cb(null, {
+          id: '',
+          email: '',
+          role: EUserRole.USER,
+          status: EUserStatus.ACTIVE,
+          error: {
+            message: 'You have already used another provider',
+            statusCode: HttpStatus.FORBIDDEN,
+          },
+        });
+      } else {
+        cb(null, {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+        });
+      }
     }
   }
 }

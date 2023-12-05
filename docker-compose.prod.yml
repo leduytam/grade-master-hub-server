@@ -27,6 +27,8 @@ services:
     container_name: server
     restart: unless-stopped
     env_file: .env.production
+    ports:
+      - ${PORT}:${PORT}
     depends_on:
       db:
         condition: service_healthy
