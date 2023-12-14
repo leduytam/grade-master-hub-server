@@ -12,16 +12,6 @@ services:
     ports:
       - 5432:5432
 
-  maildev:
-    image: maildev/maildev
-    environment:
-      MAILDEV_SMTP_PORT: 1025
-      MAILDEV_WEB_USER: ${MAILDEV_WEB_USER}
-      MAILDEV_WEB_PASS: ${MAILDEV_WEB_PASS}
-    ports:
-      - 1080:1080
-      - 1025:1025
-
   server:
     image: registry.digitalocean.com/grade-master-hub/server-dev
     env_file: .env.development

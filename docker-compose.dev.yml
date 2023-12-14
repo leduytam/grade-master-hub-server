@@ -18,23 +18,6 @@ services:
       timeout: 5s
       retries: 5
 
-  maildev:
-    image: maildev/maildev
-    container_name: maildev
-    restart: unless-stopped
-    environment:
-      MAILDEV_SMTP_PORT: ${MAILER_PORT}
-      MAILDEV_WEB_USER: ${MAILDEV_WEB_USER}
-      MAILDEV_WEB_PASS: ${MAILDEV_WEB_PASS}
-      MAILDEV_HTTPS: ${MAILDEV_HTTPS}
-      MAILDEV_HTTPS_KEY: ${MAILDEV_HTTPS_KEY}
-      MAILDEV_HTTPS_CERT: ${MAILDEV_HTTPS_CERT}
-      MAILDEV_INCOMING_USER: ${MAILER_USER}
-      MAILDEV_INCOMING_PASS: ${MAILER_PASSWORD}
-    ports:
-      - 1080:1080
-      - ${MAILER_PORT}:${MAILER_PORT}
-
   server:
     image: registry.digitalocean.com/grade-master-hub/server-dev
     build:
