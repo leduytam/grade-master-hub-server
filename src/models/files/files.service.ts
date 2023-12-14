@@ -26,8 +26,6 @@ export class FilesService {
     const paths = {
       [EFileDriver.LOCAL]: `${this.configService.get('app.serverUrl', {
         infer: true,
-      })}/${this.configService.get('app.apiPrefix', {
-        infer: true,
       })}/static/${this.configService.get('file.local.folder', {
         infer: true,
       })}/${file.filename}`,

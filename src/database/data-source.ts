@@ -1,11 +1,9 @@
-import dotenv from 'dotenv';
+import dotenvFlow from 'dotenv-flow';
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-dotenv.config({
-  path: `.env.${process.env.NODE_ENV || 'development'}`,
-});
+dotenvFlow.config();
 
 export const appDataSource = new DataSource({
   type: process.env.DB_TYPE || 'postgres',

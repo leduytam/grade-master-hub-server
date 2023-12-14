@@ -60,8 +60,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         status: newUser.status,
       });
     } else {
-      console.log(user);
-
       if (!user.googleId) {
         cb(null, {
           id: '',

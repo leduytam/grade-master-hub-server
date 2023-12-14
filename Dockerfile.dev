@@ -4,8 +4,9 @@ WORKDIR /app
 
 ENV NODE_ENV development
 
-COPY --chown=node:node package.json yarn.lock ./
 COPY --chown=node:node . .
+
+RUN mkdir -p /app/node_modules && chown -R node:node /app
 
 RUN yarn
 
@@ -13,4 +14,4 @@ RUN yarn build
 
 USER node
 
-CMD ["sh", "-c", "yarn seeds:dev && yarn start:dev"]
+CMD ["sh", "-c", "yarn seeds:dev && node dist/main.js"]

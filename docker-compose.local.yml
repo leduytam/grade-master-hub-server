@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./dev-volume/db-data:/var/lib/postgresql/data
+      - ./local-volume/db-data:/var/lib/postgresql/data
     ports:
       - ${DB_PORT}:5432
     healthcheck:
@@ -18,17 +18,29 @@ services:
       timeout: 5s
       retries: 5
 
+  maildev:
+    image: maildev/maildev
+    container_name: maildev
+    restart: unless-stopped
+    environment:
+      MAILDEV_SMTP_PORT: ${MAILER_PORT}
+    ports:
+      - 1080:1080
+      - ${MAILER_PORT}:${MAILER_PORT}
+
   server:
-    image: registry.digitalocean.com/grade-master-hub/server-dev
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.local
     container_name: server
     restart: unless-stopped
-    env_file: .env.development
+    env_file: .env.development.local
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
       - ${PORT}:${PORT}
 
@@ -46,7 +58,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./dev-volume/pgadmin-data:/var/lib/pgadmin
+      - ./local-volume/pgadmin-data:/var/lib/pgadmin
 
 volumes:
   db-data:

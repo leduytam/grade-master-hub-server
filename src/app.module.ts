@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import DotenvFlow from 'dotenv-flow';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import appConfig from './configs/app.config';
@@ -16,12 +17,13 @@ import { MailerModule } from './mailer/mailer.module';
 import { FilesModule } from './models/files/files.module';
 import { UsersModule } from './models/users/users.module';
 
+DotenvFlow.config();
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, authConfig, mailerConfig, fileConfig],
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
     ServeStaticModule.forRootAsync({
       inject: [ConfigService],
