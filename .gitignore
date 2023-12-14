@@ -41,5 +41,6 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Docker volumes
-dev-volumes
-prod-volumes
+dev-volume
+prod-volume
+local-volume

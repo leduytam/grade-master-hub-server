@@ -1,4 +1,6 @@
-/**/dev-volumes/*
-/**/prod-volumes/*
-dev-volumes
-prod-volumes
+/**/local-volume/*
+/**/dev-volume/*
+/**/prod-volume/*
+local-volume
+dev-volume
+prod-volume

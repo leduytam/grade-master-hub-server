@@ -1,0 +1,60 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [chore/GMH-40]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create env file
+        run: |
+          touch .env.development
+          echo "${{ secrets.DEV_ENV }}" > .env.development
+
+      - name: Build image
+        run: docker compose --env-file=.env.development -f docker-compose.dev.yml build
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_CONTAINER_REGISTRY_ACCESS_TOKEN }}
+
+      - name: Login to Digital Ocean Container Registry
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Push image to Digital Ocean Container Registry
+        run: docker compose --env-file=.env.development -f docker-compose.dev.yml push
+
+      - name: Copy .env.development & dev.swarm.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USER }}
+          key: ${{ secrets.SSH_DEV_KEY }}
+          overwrite: true
+          source: .env.development,dev.swarm.yml
+          target: /var/www/grade-master-hub-server-dev
+
+      - name: Deploy Stack
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USER }}
+          key: ${{ secrets.SSH_DEV_KEY }}
+          script: |
+            mkdir -p /var/www/grade-master-hub-server-dev
+            mkdir -p /var/www/grade-master-hub-server-dev/dev-volume
+            mkdir -p /var/www/grade-master-hub-server-dev/dev-volume/db-data
+            mkdir -p /var/www/grade-master-hub-server-dev/dev-volume/pgadmin-data
+            cd /var/www/grade-master-hub-server-dev
+            export $(cat .env.development) && docker stack deploy -c dev.swarm.yml grade-master-hub-dev --with-registry-auth
+            rm .env.development dev.swarm.yml
