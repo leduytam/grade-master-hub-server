@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./dev-volumes/db-data:/var/lib/postgresql/data
+      - ./dev-volume/db-data:/var/lib/postgresql/data
     ports:
       - ${DB_PORT}:5432
     healthcheck:
@@ -58,7 +58,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./dev-volumes/pgadmin-data:/var/lib/pgadmin
+      - ./dev-volume/pgadmin-data:/var/lib/pgadmin
 
 volumes:
   db-data:

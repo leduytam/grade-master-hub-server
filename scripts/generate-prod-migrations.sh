@@ -14,8 +14,8 @@ if [ ! -f $ENV_FILE ]; then
     exit 1
 fi
 
-if [ -d "$SCRIPT_DIR/../prod-volumes" ]; then
-    echo "prod-volumes directory found! Please remove it before running this script."
+if [ -d "$SCRIPT_DIR/../prod-volume" ]; then
+    echo "prod-volume directory found! Please remove it before running this script."
     exit 1
 fi
 
