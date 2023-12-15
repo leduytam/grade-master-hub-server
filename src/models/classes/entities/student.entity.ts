@@ -12,7 +12,9 @@ export class Student {
   @Column({ type: String })
   name: string;
 
-  @ManyToOne(() => Class, (classEntity) => classEntity.students)
+  @ManyToOne(() => Class, (classEntity) => classEntity.students, {
+    onDelete: 'CASCADE',
+  })
   @Expose({
     name: 'class',
     toPlainOnly: true,
@@ -24,6 +26,7 @@ export class Student {
 
   @ManyToOne(() => User, (user) => user.students, {
     onDelete: 'SET NULL',
+    nullable: true,
   })
-  user: User;
+  user?: User | null;
 }
