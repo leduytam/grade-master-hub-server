@@ -114,7 +114,11 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<IUserPayload> | null {
-    const user = await this.usersService.findOneByEmail(email);
+    const user = await this.usersService.findOne({
+      where: {
+        email,
+      },
+    });
 
     if (user && (await bcrypt.compare(password, user.password))) {
       return {
@@ -129,7 +133,11 @@ export class AuthService {
   }
 
   async getMe(userId: string) {
-    return this.usersService.findOneById(userId);
+    return this.usersService.findOne({
+      where: {
+        id: userId,
+      },
+    });
   }
 
   async updateMe(userId: string, body: UpdateMeDto) {
@@ -137,7 +145,11 @@ export class AuthService {
   }
 
   async changePassword(userId: string, body: ChangePasswordDto) {
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -164,7 +176,7 @@ export class AuthService {
   }
 
   async uploadMyAvatar(
-    userId: User['id'],
+    userId: string,
     file: Express.Multer.File,
   ): Promise<{
     avatar: string;
@@ -177,7 +189,11 @@ export class AuthService {
   }
 
   async resendVerificationEmail(email: string) {
-    const user = await this.usersService.findOneByEmail(email);
+    const user = await this.usersService.findOne({
+      where: {
+        email,
+      },
+    });
 
     if (!user || user.status !== EUserStatus.PENDING) {
       throw new BadRequestException(
@@ -212,7 +228,11 @@ export class AuthService {
       },
     );
 
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     this.mailService.sendVerifiedEmailSuccess({
       to: user.email,
@@ -256,7 +276,9 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     const user = await this.usersService.findOne({
-      email,
+      where: {
+        email,
+      },
     });
 
     if (user) {
@@ -289,7 +311,11 @@ export class AuthService {
       },
     );
 
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     this.mailService.sendChangedPasswordSuccess({
       to: user.email,

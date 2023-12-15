@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import DotenvFlow from 'dotenv-flow';
+import dotenvFlow from 'dotenv-flow';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import appConfig from './configs/app.config';
@@ -14,10 +14,11 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
+import { ClassesModule } from './models/classes/classes.module';
 import { FilesModule } from './models/files/files.module';
 import { UsersModule } from './models/users/users.module';
 
-DotenvFlow.config();
+dotenvFlow.config();
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ DotenvFlow.config();
     FilesModule,
     AuthModule,
     UsersModule,
+    ClassesModule,
   ],
 })
 export class AppModule {}

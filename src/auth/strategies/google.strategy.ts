@@ -37,7 +37,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     cb: VerifyCallback,
   ) {
     const { id, name, emails, photos } = profile;
-    const user = await this.usersService.findOneByEmail(emails[0].value);
+    const user = await this.usersService.findOne({
+      where: {
+        email: emails[0].value,
+      },
+    });
 
     if (!user) {
       const avatar = await this.filesService.create(photos[0].value);

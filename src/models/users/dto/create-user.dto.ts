@@ -9,14 +9,14 @@ import {
   IsStrongPassword,
   Validate,
 } from 'class-validator';
-import { IsNotExist } from 'src/common/validators/is-not-exists.validator';
+import { IsNotExists } from 'src/common/validators/is-not-exists.validator';
 import { EUserRole } from '../types/user-roles.enum';
 import { EUserStatus } from '../types/user-statuses.enum';
 
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
-  @Validate(IsNotExist, ['User'], {
+  @Validate(IsNotExists, ['User'], {
     message: 'email is already in use',
   })
   @ApiProperty({

@@ -15,7 +15,7 @@ type ValidationEntity =
 
 @Injectable()
 @ValidatorConstraint({ name: 'IsNotExist', async: true })
-export class IsNotExist implements ValidatorConstraintInterface {
+export class IsNotExists implements ValidatorConstraintInterface {
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,

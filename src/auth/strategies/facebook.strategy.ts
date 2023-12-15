@@ -38,7 +38,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   ) {
     const { id, displayName } = profile;
     const user = await this.usersService.findOne({
-      facebookId: id,
+      where: {
+        facebookId: id,
+      },
     });
 
     if (!user) {

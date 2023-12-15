@@ -24,12 +24,17 @@ export class UserVerificationToken {
   @Column()
   expiresAt: Date;
 
-  @ManyToOne(() => User, (user) => user.userVerificationTokens)
+  @ManyToOne(() => User, (user) => user.userVerificationTokens, {
+    onDelete: 'CASCADE',
+  })
   user: string;
 
   @ManyToOne(
     () => VerificationTokenType,
     (verificationTokenType) => verificationTokenType.verificationTokenToUsers,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   tokenType: number;
 
