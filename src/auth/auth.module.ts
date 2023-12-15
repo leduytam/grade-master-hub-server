@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { IsExist } from 'src/common/validators/is-exists.validator';
-import { IsNotExist } from 'src/common/validators/is-not-exists.validator';
+import { IsExists } from 'src/common/validators/is-exists.validator';
+import { IsNotExists } from 'src/common/validators/is-not-exists.validator';
 import { IAllConfig } from 'src/configs/types/config.interface';
 import { MailModule } from 'src/mail/mail.module';
 import { FilesModule } from 'src/models/files/files.module';
@@ -20,8 +20,8 @@ import { LocalStrategy } from './strategies/local.strategy';
   controllers: [AuthController],
   providers: [
     AuthService,
-    IsExist,
-    IsNotExist,
+    IsExists,
+    IsNotExists,
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
