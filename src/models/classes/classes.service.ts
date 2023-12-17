@@ -387,7 +387,10 @@ export class ClassesService {
     await this.attendanceRepo.save(attendance);
   }
 
-  async joinClassWithToken(userId: string, token: string): Promise<void> {
+  async joinClassWithToken(
+    userId: string,
+    token: string,
+  ): Promise<Class & { role: string }> {
     const invitation = await this.invitationRepo.findOne({
       where: {
         token,
@@ -406,9 +409,14 @@ export class ClassesService {
     }
 
     await this.joinClass(userId, invitation.classEntity.id, invitation.role);
+
+    return this.findOneWithRole(userId, invitation.classEntity.id);
   }
 
-  async joinClassWithCode(userId: string, code: string): Promise<void> {
+  async joinClassWithCode(
+    userId: string,
+    code: string,
+  ): Promise<Class & { role: string }> {
     const foundClass = await this.findOne({
       where: {
         code,
@@ -420,6 +428,8 @@ export class ClassesService {
     }
 
     await this.joinClass(userId, foundClass.id, EClassRole.STUDENT);
+
+    return this.findOneWithRole(userId, foundClass.id);
   }
 
   private async joinClass(userId: string, classId: string, role: EClassRole) {

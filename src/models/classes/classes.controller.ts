@@ -216,13 +216,16 @@ export class ClassesController {
   async joinWithToken(
     @Req() req: Request,
     @Body() body: JoinClassWithTokenDto,
-  ): Promise<void> {
+  ): Promise<Class & { role: string }> {
     return this.classesService.joinClassWithToken(req.user.id, body.token);
   }
 
   @Post('join-with-code')
   @Auth(EUserRole.USER)
-  async joinWithCode(@Req() req: Request, @Body() body: JoinClassWithCodeDto) {
+  async joinWithCode(
+    @Req() req: Request,
+    @Body() body: JoinClassWithCodeDto,
+  ): Promise<Class & { role: string }> {
     return this.classesService.joinClassWithCode(req.user.id, body.code);
   }
 
