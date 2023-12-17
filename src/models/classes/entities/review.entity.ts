@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { EReviewStatus } from '../types/review-statuses.enum';
 import { Class } from './class.entity';
+import { Grade } from './grade.entity';
 import { ReviewComment } from './review-comment.entity';
 
 @Entity('reviews')
@@ -28,13 +29,14 @@ export class Review {
   studentCurrentGrade: number;
 
   @Column({ type: Number, nullable: true })
-  studentActualGrade?: number | null;
+  studentFinalGrade?: number | null;
 
-  @Column({ type: 'enum', enum: EReviewStatus, default: EReviewStatus.OPENING })
+  @Column({ type: 'enum', enum: EReviewStatus, default: EReviewStatus.PENDING })
   status: EReviewStatus;
 
   @ManyToOne(() => User, {
     nullable: true,
+    onDelete: 'SET NULL',
   })
   endedBy?: User | null;
 
@@ -47,9 +49,12 @@ export class Review {
   @OneToMany(() => ReviewComment, (comment) => comment.review)
   comments: ReviewComment[];
 
-  @ManyToOne(() => Class, (classEntity) => classEntity.reviews, {
+  @ManyToOne(() => Grade, (grade) => grade.reviews, {
     onDelete: 'CASCADE',
   })
+  grade: Grade;
+
+  @ManyToOne(() => Class, (classEntity) => classEntity.reviews)
   @Expose({
     name: 'class',
     toPlainOnly: true,

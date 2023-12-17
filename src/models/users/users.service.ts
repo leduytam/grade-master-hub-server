@@ -33,6 +33,10 @@ export class UsersService {
     return this.repo.findOne(options);
   }
 
+  async findOneOrFail(options: FindOneOptions<User>): Promise<User> {
+    return this.repo.findOneOrFail(options);
+  }
+
   async find(options: FindManyOptions<User>): Promise<User[]> {
     return this.repo.find(options);
   }

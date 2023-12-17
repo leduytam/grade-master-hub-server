@@ -204,7 +204,7 @@ export class CompositionsService {
       finalized: true,
     });
 
-    // TODO: notify all attendees that are students of this class
+    // TODO: notify all accounts that mapped to students in this class
   }
 
   async updateOrder(id: string, order: number): Promise<void> {
