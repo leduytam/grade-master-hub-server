@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
@@ -8,6 +16,7 @@ import { EUserRole } from '../users/types/user-roles.enum';
 import { CreateReviewCommentDto } from './dto/reviews/create-comment.dto';
 import { CreateReplyCommentDto } from './dto/reviews/create-reply.dto';
 import { CreateReviewDto } from './dto/reviews/create-review.dto';
+import { UpdateCommentReplyDto } from './dto/reviews/update-comment-reply.dto';
 import { UpdateReviewStatusDto } from './dto/reviews/update-review-status.dto';
 import { ReviewComment } from './entities/review-comment.entity';
 import { Review } from './entities/review.entity';
@@ -67,23 +76,36 @@ export class ReviewsController {
     await this.reviewsService.updateStatus(req.user.id, id, body);
   }
 
-  @Get(':id/comments')
+  @Get(':reviewId/comments')
   @Auth()
   async getComments(
     @Req() req: Request,
-    @ParamUUIDValidation('id', Review) id: string,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<ReviewComment>> {
-    await this.reviewsService.validatePermission(req.user.id, id);
+    await this.reviewsService.validatePermission(req.user.id, reviewId);
 
-    return this.reviewsService.getCommentsInReview(id, query);
+    return this.reviewsService.getCommentsInReview(reviewId, query);
   }
 
-  @Post(':id/comments')
+  @Get(':reviewId/comments/:commentId/replies')
   @Auth()
+  async getReplies(
+    @Req() req: Request,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
+    @ParamUUIDValidation('commentId', ReviewComment) commentId: string,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<ReviewComment>> {
+    await this.reviewsService.validatePermission(req.user.id, reviewId);
+
+    return this.reviewsService.getRepliesInComment(commentId, query);
+  }
+
+  @Post(':reviewId/comments')
+  @Auth(EUserRole.USER)
   async createComment(
     @Req() req: Request,
-    @ParamUUIDValidation('id', Review) reviewId: string,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
     @Body() body: CreateReviewCommentDto,
   ): Promise<ReviewComment> {
     await this.reviewsService.validatePermission(req.user.id, reviewId);
@@ -91,16 +113,58 @@ export class ReviewsController {
     return this.reviewsService.createComment(req.user.id, reviewId, body);
   }
 
-  @Post(':id/comments/:commentId/reply')
-  @Auth()
-  async createCommentReply(
+  @Post(':reviewId/comments/:commentId/reply')
+  @Auth(EUserRole.USER)
+  async createReply(
     @Req() req: Request,
-    @ParamUUIDValidation('id', Review) reviewId: string,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
     @ParamUUIDValidation('commentId', ReviewComment) commentId: string,
     @Body() body: CreateReplyCommentDto,
   ): Promise<ReviewComment> {
     await this.reviewsService.validatePermission(req.user.id, reviewId);
 
-    return this.reviewsService.createReply(req.user.id, commentId, body);
+    return this.reviewsService.createReply(
+      req.user.id,
+      reviewId,
+      commentId,
+      body,
+    );
+  }
+
+  @Get(':reviewId/comments/:id')
+  @Auth()
+  async getCommentOrReply(
+    @Req() req: Request,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
+    @ParamUUIDValidation('id', ReviewComment) commentId: string,
+  ): Promise<ReviewComment> {
+    await this.reviewsService.validatePermission(req.user.id, reviewId);
+
+    return this.reviewsService.getCommentReply(commentId);
+  }
+
+  @Patch(':reviewId/comments/:id')
+  @Auth()
+  async updateCommentOrReply(
+    @Req() req: Request,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
+    @ParamUUIDValidation('id', ReviewComment) commentId: string,
+    @Body() body: UpdateCommentReplyDto,
+  ): Promise<void> {
+    await this.reviewsService.validatePermission(req.user.id, reviewId);
+
+    await this.reviewsService.updateCommentReply(commentId, body);
+  }
+
+  @Delete(':reviewId/comments/:id')
+  @Auth()
+  async deleteCommentOrReply(
+    @Req() req: Request,
+    @ParamUUIDValidation('reviewId', Review) reviewId: string,
+    @ParamUUIDValidation('id', ReviewComment) commentId: string,
+  ): Promise<void> {
+    await this.reviewsService.validatePermission(req.user.id, reviewId);
+
+    await this.reviewsService.deleteCommentReply(commentId);
   }
 }

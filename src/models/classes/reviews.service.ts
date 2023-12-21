@@ -26,6 +26,7 @@ import { CompositionsService } from './compositions.service';
 import { CreateReviewCommentDto } from './dto/reviews/create-comment.dto';
 import { CreateReplyCommentDto } from './dto/reviews/create-reply.dto';
 import { CreateReviewDto } from './dto/reviews/create-review.dto';
+import { UpdateCommentReplyDto } from './dto/reviews/update-comment-reply.dto';
 import { UpdateReviewStatusDto } from './dto/reviews/update-review-status.dto';
 import { Grade } from './entities/grade.entity';
 import { ReviewComment } from './entities/review-comment.entity';
@@ -272,39 +273,120 @@ export class ReviewsService {
     });
   }
 
-  async getCommentReply(_commentId: string): Promise<ReviewComment> {
-    return null;
+  async getCommentReply(commentId: string): Promise<ReviewComment> {
+    const comment = await this.commentsRepo.findOne({
+      where: {
+        id: commentId,
+      },
+      relations: ['user', 'user.avatar', 'parent', 'review'],
+    });
+
+    return comment;
+  }
+
+  async getRepliesInComment(
+    commentId: string,
+    query: PaginateQuery,
+  ): Promise<Paginated<ReviewComment>> {
+    const qb = this.commentsRepo
+      .createQueryBuilder('comment')
+      .where('comment.parent = :commentId', { commentId })
+      .orderBy('comment.createdAt', 'DESC');
+
+    return paginate(query, qb, {
+      sortableColumns: ['createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createComment(
-    _userId: string,
-    _reviewId: string,
-    _body: CreateReviewCommentDto,
+    userId: string,
+    reviewId: string,
+    body: CreateReviewCommentDto,
   ): Promise<ReviewComment> {
-    // TODO: implement later
+    const review = await this.findOne({
+      where: {
+        id: reviewId,
+      },
+    });
 
-    return null;
+    if (review.status !== EReviewStatus.PENDING) {
+      throw new BadRequestException('Only pending reviews can be commented on');
+    }
+
+    const comment = this.commentsRepo.create({
+      content: body.content,
+      review: {
+        id: reviewId,
+      },
+      user: {
+        id: userId,
+      },
+    });
+
+    const savedComment = await this.commentsRepo.save(comment);
+
+    return this.commentsRepo.findOne({
+      where: {
+        id: savedComment.id,
+      },
+      relations: ['user', 'user.avatar'],
+    });
   }
 
   async createReply(
-    _userId: string,
-    _commentId: string,
-    _body: CreateReplyCommentDto,
+    userId: string,
+    reviewId: string,
+    commentId: string,
+    body: CreateReplyCommentDto,
   ): Promise<ReviewComment> {
-    // TODO: implement later
+    const review = await this.findOne({
+      where: {
+        id: reviewId,
+      },
+    });
 
-    return null;
+    if (review.status !== EReviewStatus.PENDING) {
+      throw new BadRequestException('Only pending reviews can be commented on');
+    }
+
+    const comment = await this.commentsRepo.findOne({
+      where: {
+        id: commentId,
+      },
+    });
+
+    const reply = this.commentsRepo.create({
+      content: body.content,
+      user: {
+        id: userId,
+      },
+      parent: {
+        id: commentId,
+      },
+      level: comment.level + 1,
+    });
+
+    const savedReply = await this.commentsRepo.save(reply);
+
+    return this.commentsRepo.findOne({
+      where: {
+        id: savedReply.id,
+      },
+      relations: ['user', 'user.avatar'],
+    });
   }
 
-  async updateCommentReply(_id: string): Promise<UpdateResult> {
-    // TODO: implement later
-
-    return null;
+  async updateCommentReply(
+    id: string,
+    body: UpdateCommentReplyDto,
+  ): Promise<UpdateResult> {
+    return await this.commentsRepo.update(id, {
+      content: body.content,
+    });
   }
 
-  async deleteCommentReply(_id: string): Promise<DeleteResult> {
-    // TODO: implement later
-
-    return null;
+  async deleteCommentReply(id: string): Promise<DeleteResult> {
+    return this.commentsRepo.delete(id);
   }
 }

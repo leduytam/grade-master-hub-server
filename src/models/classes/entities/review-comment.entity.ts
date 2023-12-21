@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  VirtualColumn,
 } from 'typeorm';
 import { Review } from './review.entity';
 
@@ -47,4 +48,12 @@ export class ReviewComment {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @VirtualColumn({
+    type: Number,
+    query: (alias) => {
+      return `(SELECT COUNT(*) FROM review_comments WHERE "parent_id" = ${alias}.id)`;
+    },
+  })
+  childrenCount: number;
 }
