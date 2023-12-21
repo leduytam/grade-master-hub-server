@@ -2,6 +2,8 @@ import * as bcrypt from 'bcrypt';
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { Attendance } from 'src/models/classes/entities/attendance.entity';
 import { Class } from 'src/models/classes/entities/class.entity';
+import { ReviewComment } from 'src/models/classes/entities/review-comment.entity';
+import { Review } from 'src/models/classes/entities/review.entity';
 import { Student } from 'src/models/classes/entities/student.entity';
 import { File } from 'src/models/files/entities/file.entity';
 import { UserVerificationToken } from 'src/models/user-verification-tokens/entities/user-verification-token.entity';
@@ -99,6 +101,12 @@ export class User {
 
   @OneToMany(() => Student, (student) => student.user)
   students: Student[];
+
+  @OneToMany(() => Review, (review) => review.requester)
+  reviews: Review[];
+
+  @OneToMany(() => ReviewComment, (comment) => comment.user)
+  reviewComments: ReviewComment[];
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -3,10 +3,12 @@ import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MAX_GRADE } from '../constants';
 import { Composition } from './composition.entity';
+import { Review } from './review.entity';
 import { Student } from './student.entity';
 
 @Entity('grades')
@@ -27,4 +29,7 @@ export class Grade {
     onDelete: 'CASCADE',
   })
   composition: Composition;
+
+  @OneToMany(() => Review, (review) => review.grade)
+  reviews: Review[];
 }

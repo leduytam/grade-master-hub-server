@@ -967,8 +967,6 @@ export class ClassesService {
         grade.grade = null;
       }
 
-      delete grade.id;
-
       return grade;
     });
   }
@@ -1007,5 +1005,20 @@ export class ClassesService {
         id: classId,
       },
     });
+  }
+
+  async getRoleInClass(userId: string, classId: string): Promise<EClassRole> {
+    const attendance = await this.attendanceRepo.findOne({
+      where: {
+        classEntity: {
+          id: classId,
+        },
+        user: {
+          id: userId,
+        },
+      },
+    });
+
+    return attendance?.role ?? null;
   }
 }

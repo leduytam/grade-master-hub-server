@@ -12,6 +12,7 @@ import {
 import { Attendance } from './attendance.entity';
 import { Composition } from './composition.entity';
 import { Invitation } from './invitation.entity';
+import { Review } from './review.entity';
 import { Student } from './student.entity';
 
 @Entity('classes')
@@ -44,6 +45,9 @@ export class Class {
 
   @OneToMany(() => Composition, (composition) => composition.classEntity)
   compositions: Composition[];
+
+  @OneToMany(() => Review, (review) => review.classEntity)
+  reviews: Review[];
 
   @CreateDateColumn()
   createdAt: Date;

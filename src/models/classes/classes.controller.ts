@@ -42,7 +42,9 @@ import { Attendance } from './entities/attendance.entity';
 import { Class } from './entities/class.entity';
 import { Composition } from './entities/composition.entity';
 import { Grade } from './entities/grade.entity';
+import { Review } from './entities/review.entity';
 import { Student } from './entities/student.entity';
+import { ReviewsService } from './reviews.service';
 import { EClassRole } from './types/class-roles.enum';
 import { IGradeBoard } from './types/grade-board.interface';
 
@@ -55,6 +57,7 @@ export class ClassesController {
   constructor(
     private readonly classesService: ClassesService,
     private readonly compositionsService: CompositionsService,
+    private readonly reviewsService: ReviewsService,
   ) {}
 
   @Post()
@@ -92,7 +95,7 @@ export class ClassesController {
 
   @Get()
   @Auth(EUserRole.ADMIN)
-  findAll(@Paginate() query: PaginateQuery) {
+  findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Class>> {
     return this.classesService.findAllWithPaginate(query);
   }
 
@@ -453,5 +456,19 @@ export class ClassesController {
     });
 
     await this.classesService.clearStudentList(classId);
+  }
+
+  @Get(':classId/reviews')
+  @Auth()
+  async getReviews(
+    @Req() req: Request,
+    @ParamUUIDValidation('classId', Class) classId: string,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
+    await this.classesService.validatePermission(req.user.id, classId, {
+      role: EClassRole.TEACHER,
+    });
+
+    return this.reviewsService.findAllWithPaginate(query);
   }
 }

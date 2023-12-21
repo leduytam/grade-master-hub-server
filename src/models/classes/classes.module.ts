@@ -11,11 +11,15 @@ import { Class } from './entities/class.entity';
 import { Composition } from './entities/composition.entity';
 import { Grade } from './entities/grade.entity';
 import { Invitation } from './entities/invitation.entity';
+import { ReviewComment } from './entities/review-comment.entity';
+import { Review } from './entities/review.entity';
 import { Student } from './entities/student.entity';
+import { ReviewsController } from './reviews.controller';
+import { ReviewsService } from './reviews.service';
 
 @Module({
-  controllers: [ClassesController, CompositionsController],
-  providers: [ClassesService, CompositionsService, IsExists],
+  controllers: [ClassesController, CompositionsController, ReviewsController],
+  providers: [ClassesService, CompositionsService, IsExists, ReviewsService],
   imports: [
     TypeOrmModule.forFeature([
       Class,
@@ -24,6 +28,8 @@ import { Student } from './entities/student.entity';
       Attendance,
       Composition,
       Grade,
+      Review,
+      ReviewComment,
     ]),
     forwardRef(() => UsersModule),
   ],
