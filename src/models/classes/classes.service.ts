@@ -880,6 +880,7 @@ export class ClassesService {
           id: string;
           grade: number | null;
           percentage: number;
+          finalized: boolean;
         }[];
       }
     >();
@@ -898,6 +899,7 @@ export class ClassesService {
           id: composition.id,
           grade: grade.grade,
           percentage: composition.percentage,
+          finalized: composition.finalized,
         });
       });
     });
@@ -920,6 +922,7 @@ export class ClassesService {
           return {
             id: composition.id,
             grade: composition.grade,
+            finalized: composition.finalized,
           };
         }),
         total: total,
