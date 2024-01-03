@@ -139,7 +139,7 @@ export class CompositionsController {
       role: EClassRole.TEACHER,
     });
 
-    return await this.compositionsService.finalize(id);
+    return await this.compositionsService.finalize(req.user.id, id);
   }
 
   @Delete(':id')

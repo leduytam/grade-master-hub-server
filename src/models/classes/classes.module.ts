@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IsExists } from 'src/common/validators/is-exists.validator';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { UsersModule } from '../users/users.module';
 import { ClassesController } from './classes.controller';
 import { ClassesService } from './classes.service';
@@ -32,6 +33,7 @@ import { ReviewsService } from './reviews.service';
       ReviewComment,
     ]),
     forwardRef(() => UsersModule),
+    NotificationsModule,
   ],
   exports: [ClassesService, CompositionsService],
 })

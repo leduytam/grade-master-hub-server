@@ -549,6 +549,23 @@ export class ClassesService {
     await this.leave(attendeeIdToKick, classId);
   }
 
+  async getAttendeesWithoutPaginate(
+    classId: string,
+    options?: {
+      role: EClassRole;
+    },
+  ): Promise<Attendance[]> {
+    return this.attendanceRepo.find({
+      where: {
+        classEntity: {
+          id: classId,
+        },
+        role: options?.role,
+      },
+      relations: ['user', 'user.avatar'],
+    });
+  }
+
   async getAttendees(
     classId: string,
     query: PaginateQuery,
