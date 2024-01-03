@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   HttpException,
+  Inject,
   Injectable,
   Logger,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CsvError, parse } from 'csv-parse/sync';
@@ -14,6 +16,9 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ENotificationType } from '../notifications/types/notification-types.enum';
+import { UsersService } from '../users/users.service';
 import { ClassesService } from './classes.service';
 import { MAX_GRADE } from './constants';
 import { CreateCompositionDto } from './dto/compositions/create-composition.dto';
@@ -31,6 +36,9 @@ export class CompositionsService {
     @InjectRepository(Grade)
     private readonly gradeRepo: Repository<Grade>,
     private readonly classesService: ClassesService,
+    private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
   ) {}
 
   async create(
@@ -176,7 +184,7 @@ export class CompositionsService {
     );
   }
 
-  async finalize(id: string): Promise<void> {
+  async finalize(userId: string, id: string): Promise<void> {
     const composition = await this.findOne({
       where: {
         id,
@@ -204,7 +212,34 @@ export class CompositionsService {
       finalized: true,
     });
 
-    // TODO: notify all accounts that mapped to students in this class
+    // notify all accounts that mapped to students in this class
+    const user = await this.usersService.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    const attendees = await this.classesService.getAttendeesWithoutPaginate(
+      composition.classEntity.id,
+    );
+
+    const attendeeIds = attendees
+      .map((attendee) => attendee.user.id)
+      .filter((id) => id !== userId);
+
+    if (attendeeIds.length > 0) {
+      this.notificationsService.createMany(attendeeIds, {
+        title: `Composition ${composition.name} has been finalized`,
+        description: `Composition ${
+          composition.name
+        } has been finalized by ${`${user.firstName} ${user.lastName}`}`,
+        type: ENotificationType.GRADE_COMPOSITION_FINALIZED,
+        data: JSON.stringify({
+          compositionId: composition.id,
+          classId: composition.classEntity.id,
+        }),
+      });
+    }
   }
 
   async updateOrder(id: string, order: number): Promise<void> {

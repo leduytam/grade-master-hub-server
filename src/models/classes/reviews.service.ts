@@ -19,6 +19,8 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ENotificationType } from '../notifications/types/notification-types.enum';
 import { EUserRole } from '../users/types/user-roles.enum';
 import { UsersService } from './../users/users.service';
 import { ClassesService } from './classes.service';
@@ -45,6 +47,7 @@ export class ReviewsService {
     private readonly usersService: UsersService,
     private readonly classesService: ClassesService,
     private readonly compositionsService: CompositionsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(userId: string, body: CreateReviewDto): Promise<Review> {
@@ -107,7 +110,38 @@ export class ReviewsService {
 
       const savedReview = await this.repo.save(review);
 
-      // TODO: Send notification to all teachers in the class
+      // send notification to all teachers in the class
+      const user = await this.usersService.findOne({
+        where: {
+          id: userId,
+        },
+      });
+
+      const teachers = await this.classesService.getAttendeesWithoutPaginate(
+        grade.composition.classEntity.id,
+        {
+          role: EClassRole.TEACHER,
+        },
+      );
+
+      const teacherIds = teachers
+        .map((teacher) => teacher.user.id)
+        .filter((id) => id !== userId);
+
+      if (teacherIds.length > 0) {
+        await this.notificationsService.createMany(teacherIds, {
+          title: 'New review request',
+          description: `${`${user.firstName} ${user.lastName}`} has requested a review for ${
+            grade.composition.name
+          }`,
+          type: ENotificationType.GRADE_REVIEW_REQUESTED,
+          data: JSON.stringify({
+            classId: grade.composition.classEntity.id,
+            reviewId: savedReview.id,
+            compositionId: grade.composition.id,
+          }),
+        });
+      }
 
       return savedReview;
     });
@@ -155,7 +189,13 @@ export class ReviewsService {
       where: {
         id,
       },
-      relations: ['grade', 'grade.composition', 'grade.student'],
+      relations: [
+        'grade',
+        'grade.composition',
+        'grade.student',
+        'grade.composition.classEntity',
+        'grade.student.user',
+      ],
     });
 
     if (review.status !== EReviewStatus.PENDING) {
@@ -189,7 +229,25 @@ export class ReviewsService {
           status: body.status,
         });
 
-        // TODO: Send notification to the account that mapped to the student
+        // send notification to the account that mapped to the student
+        const user = await this.usersService.findOne({
+          where: {
+            id: userId,
+          },
+        });
+
+        this.notificationsService.create(review.grade.student.user.id, {
+          title: 'Review result',
+          description: `${`${user.firstName} ${user.lastName}`} has ${
+            body.status === EReviewStatus.ACCEPTED ? 'accepted' : 'rejected'
+          } your review request for ${review.grade.composition.name}`,
+          type: ENotificationType.MARK_REVIEW_DECISION,
+          data: JSON.stringify({
+            classId: review.grade.composition.classEntity.id,
+            reviewId: review.id,
+            compositionId: review.grade.composition.id,
+          }),
+        });
       });
     } catch (err) {
       Logger.error(err);
@@ -308,6 +366,12 @@ export class ReviewsService {
       where: {
         id: reviewId,
       },
+      relations: [
+        'requester',
+        'grade',
+        'grade.composition',
+        'grade.composition.classEntity',
+      ],
     });
 
     if (review.status !== EReviewStatus.PENDING) {
@@ -325,6 +389,63 @@ export class ReviewsService {
     });
 
     const savedComment = await this.commentsRepo.save(comment);
+
+    const notify = async () => {
+      const user = await this.usersService.findOne({
+        where: {
+          id: userId,
+        },
+      });
+
+      const commentsLevel1 = await this.commentsRepo.find({
+        where: {
+          review: {
+            id: reviewId,
+          },
+          level: 1,
+        },
+      });
+
+      // send notification to the requester if the comment is not from the requester
+      if (review.requester.id !== userId) {
+        this.notificationsService.create(review.requester.id, {
+          title: 'New comment',
+          description: `${`${user.firstName} ${user.lastName}`} has commented on your review request for ${
+            review.grade.composition.name
+          }`,
+          type: ENotificationType.COMMENT,
+          data: JSON.stringify({
+            classId: review.grade.composition.classEntity.id,
+            reviewId: review.id,
+            compositionId: review.grade.composition.id,
+            commentId: savedComment.id,
+          }),
+        });
+      }
+
+      // send notifications to all people who commented on the same level
+      const commenters = commentsLevel1
+        .filter((comment) => comment.user.id !== userId)
+        .map((comment) => comment.user.id);
+
+      if (commenters.length > 0) {
+        this.notificationsService.createMany(commenters, {
+          title: 'New comment',
+          description: `${`${user.firstName} ${user.lastName}`} has commented on a review request for ${
+            review.grade.composition.name
+          }`,
+          type: ENotificationType.COMMENT,
+          data: JSON.stringify({
+            classId: review.grade.composition.classEntity.id,
+            reviewId: review.id,
+            compositionId: review.grade.composition.id,
+            commentId: savedComment.id,
+          }),
+        });
+      }
+    };
+
+    notify();
 
     return this.commentsRepo.findOne({
       where: {
@@ -344,6 +465,12 @@ export class ReviewsService {
       where: {
         id: reviewId,
       },
+      relations: [
+        'requester',
+        'grade',
+        'grade.composition',
+        'grade.composition.classEntity',
+      ],
     });
 
     if (review.status !== EReviewStatus.PENDING) {
@@ -354,6 +481,7 @@ export class ReviewsService {
       where: {
         id: commentId,
       },
+      relations: ['user'],
     });
 
     const reply = this.commentsRepo.create({
@@ -368,6 +496,85 @@ export class ReviewsService {
     });
 
     const savedReply = await this.commentsRepo.save(reply);
+
+    // send notification to the requester if the comment is not from the requester
+    const notify = async () => {
+      const user = await this.usersService.findOne({
+        where: {
+          id: userId,
+        },
+      });
+
+      // notify to the user who replied if the comment is not from the user who replied
+      // notify to the requester if the comment is not from the requester
+      if (
+        comment.user.id !== userId &&
+        comment.user.id !== review.requester.id
+      ) {
+        this.notificationsService.create(comment.user.id, {
+          title: 'New reply',
+          description: `${`${user.firstName} ${user.lastName}`} has replied to your comment on a review request for ${
+            review.grade.composition.name
+          }`,
+          type: ENotificationType.COMMENT_REPLY,
+          data: JSON.stringify({
+            classId: review.grade.composition.classEntity.id,
+            reviewId: review.id,
+            compositionId: review.grade.composition.id,
+            commentId: savedReply.id,
+          }),
+        });
+      } else if (review.requester.id !== userId) {
+        this.notificationsService.create(review.requester.id, {
+          title: 'New comment',
+          description: `${`${user.firstName} ${user.lastName}`} has commented on your review request for ${
+            review.grade.composition.name
+          }`,
+          type: ENotificationType.COMMENT,
+          data: JSON.stringify({
+            classId: review.grade.composition.classEntity.id,
+            reviewId: review.id,
+            compositionId: review.grade.composition.id,
+            commentId: savedReply.id,
+          }),
+        });
+      }
+
+      // notify to all people who replied to the same comment
+      const replies = await this.commentsRepo.find({
+        where: {
+          parent: {
+            id: commentId,
+          },
+        },
+      });
+
+      const repliers = replies
+        .filter(
+          (reply) =>
+            reply.user.id !== userId && reply.user.id !== review.requester.id,
+          reply.user.id !== comment.user.id,
+        )
+        .map((reply) => reply.user.id);
+
+      if (repliers.length > 0) {
+        this.notificationsService.createMany(repliers, {
+          title: 'New reply',
+          description: `${`${user.firstName} ${user.lastName}`} has replied to a comment on a review request for ${
+            review.grade.composition.name
+          }`,
+          type: ENotificationType.COMMENT_REPLY,
+          data: JSON.stringify({
+            classId: review.grade.composition.classEntity.id,
+            reviewId: review.id,
+            compositionId: review.grade.composition.id,
+            commentId: savedReply.id,
+          }),
+        });
+      }
+    };
+
+    notify();
 
     return this.commentsRepo.findOne({
       where: {

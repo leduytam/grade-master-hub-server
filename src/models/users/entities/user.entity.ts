@@ -6,6 +6,7 @@ import { ReviewComment } from 'src/models/classes/entities/review-comment.entity
 import { Review } from 'src/models/classes/entities/review.entity';
 import { Student } from 'src/models/classes/entities/student.entity';
 import { File } from 'src/models/files/entities/file.entity';
+import { Notification } from 'src/models/notifications/entities/notification.entity';
 import { UserVerificationToken } from 'src/models/user-verification-tokens/entities/user-verification-token.entity';
 import {
   BeforeInsert,
@@ -107,6 +108,9 @@ export class User {
 
   @OneToMany(() => ReviewComment, (comment) => comment.user)
   reviewComments: ReviewComment[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 
   @BeforeInsert()
   @BeforeUpdate()

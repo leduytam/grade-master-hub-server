@@ -16,6 +16,7 @@ import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
 import { ClassesModule } from './models/classes/classes.module';
 import { FilesModule } from './models/files/files.module';
+import { NotificationsModule } from './models/notifications/notifications.module';
 import { UsersModule } from './models/users/users.module';
 
 dotenvFlow.config();
@@ -50,6 +51,7 @@ dotenvFlow.config();
     AuthModule,
     UsersModule,
     ClassesModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
