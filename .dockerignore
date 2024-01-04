@@ -3,6 +3,11 @@ Dockerfile
 node_modules
 dist
 npm-debug.log
-public/uploads
-dev-volumes
-prod-volumes
+dev-volume
+prod-volume
+local-volume
+Dockerfile.*
+.env.*
+.git
+.gitignore
+.github

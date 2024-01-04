@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
@@ -8,7 +8,12 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
 import { File } from '../files/entities/file.entity';
 import { FilesService } from '../files/files.service';
 import { User } from './entities/user.entity';
@@ -20,47 +25,23 @@ export class UsersService {
     private readonly filesService: FilesService,
   ) {}
 
-  async create(dto: DeepPartial<User>): Promise<User> {
-    return await this.repo.save(this.repo.create(dto));
+  async create(body: DeepPartial<User>): Promise<User> {
+    return await this.repo.save(this.repo.create(body));
   }
 
-  async findOne(
-    conditions: FindOptionsWhere<User> | FindOptionsWhere<User>[],
-    withDeleted: boolean = false,
-  ): Promise<User | null> {
-    return await this.repo.findOne({
-      where: conditions,
-      withDeleted,
-    });
+  async findOne(options: FindOneOptions<User>): Promise<User> {
+    return this.repo.findOne(options);
   }
 
-  async findOneById(
-    id: User['id'],
-    withDeleted: boolean = false,
-  ): Promise<User | null> {
-    const user = await this.repo.findOne({
-      where: {
-        id,
-      },
-      withDeleted,
-    });
-
-    return user;
+  async findOneOrFail(options: FindOneOptions<User>): Promise<User> {
+    return this.repo.findOneOrFail(options);
   }
 
-  async findOneByEmail(
-    email: User['email'],
-    withDeleted: boolean = false,
-  ): Promise<User | null> {
-    return await this.repo.findOne({
-      where: {
-        email,
-      },
-      withDeleted,
-    });
+  async find(options: FindManyOptions<User>): Promise<User[]> {
+    return this.repo.find(options);
   }
 
-  async findAll(
+  async findAllWithPaginate(
     query: PaginateQuery,
     withDeleted: boolean = false,
   ): Promise<Paginated<User>> {
@@ -88,9 +69,7 @@ export class UsersService {
     });
   }
 
-  async updateSave(id: User['id'], payload: DeepPartial<User>): Promise<User> {
-    await this.validateUserExist(id);
-
+  async updateSave(id: string, payload: DeepPartial<User>): Promise<User> {
     return this.repo.save(
       this.repo.create({
         id,
@@ -99,29 +78,33 @@ export class UsersService {
     );
   }
 
-  async update(id: User['id'], payload: DeepPartial<User>): Promise<User> {
-    await this.validateUserExist(id);
-
+  async update(id: string, payload: DeepPartial<User>): Promise<User> {
     if (payload.password) {
       payload.password = await bcrypt.hash(payload.password, 10);
     }
 
     await this.repo.update(id, payload);
-    return this.findOneById(id);
+    return this.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
-  async softDelete(id: User['id']): Promise<void> {
-    await this.validateUserExist(id, true);
+  async delete(_id: string): Promise<void> {
+    // TODO: cascade delete here
+  }
+
+  async softDelete(id: string): Promise<void> {
     await this.repo.softDelete(id);
   }
 
-  async restore(id: User['id']): Promise<void> {
-    await this.validateUserExist(id, true);
+  async restore(id: string): Promise<void> {
     await this.repo.restore(id);
   }
 
   async uploadAvatar(
-    userId: User['id'],
+    userId: string,
     file: Express.Multer.File,
   ): Promise<{
     avatar: string;
@@ -139,30 +122,17 @@ export class UsersService {
     };
   }
 
-  async deleteAvatar(userId: string) {
-    const user = await this.findOneById(userId);
+  async deleteAvatar(userId: string): Promise<void> {
+    const user = await this.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     await this.repo.update(userId, {
       avatar: null,
     });
 
     await this.filesService.delete(user.avatar.id);
-
-    return {
-      message: 'Avatar deleted successfully',
-    };
-  }
-
-  private async validateUserExist(
-    id: User['id'],
-    withDeleted: boolean = false,
-  ): Promise<User> {
-    const user = await this.findOneById(id, withDeleted);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
   }
 }

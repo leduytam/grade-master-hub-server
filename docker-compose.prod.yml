@@ -9,11 +9,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./prod-volumes/db-data:/var/lib/postgresql/data
+      - ./prod-volume/db-data:/var/lib/postgresql/data
     ports:
       - ${DB_PORT}:5432
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', '${DB_USERNAME}']
+      test: ['CMD', 'pg_isready', '-h', 'db', '-U', '${DB_USERNAME}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./prod-volumes/pgadmin-data:/var/lib/pgadmin
+      - ./prod-volume/pgadmin-data:/var/lib/pgadmin
 
 volumes:
   db-data:

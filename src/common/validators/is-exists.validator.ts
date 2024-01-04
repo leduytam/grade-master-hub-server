@@ -8,8 +8,8 @@ import { ValidationArguments } from 'class-validator/types/validation/Validation
 import { DataSource } from 'typeorm';
 
 @Injectable()
-@ValidatorConstraint({ name: 'IsExist', async: true })
-export class IsExist implements ValidatorConstraintInterface {
+@ValidatorConstraint({ name: 'IsExists', async: true })
+export class IsExists implements ValidatorConstraintInterface {
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,
@@ -19,16 +19,20 @@ export class IsExist implements ValidatorConstraintInterface {
     const repository = validationArguments.constraints[0];
     const pathToProperty = validationArguments.constraints[1];
 
-    const entity: unknown = await this.dataSource
-      .getRepository(repository)
-      .findOne({
-        where: {
-          [pathToProperty ? pathToProperty : validationArguments.property]:
-            value,
-          // pathToProperty ? value?.[pathToProperty] : value,
-        },
-      });
+    try {
+      const entity: unknown = await this.dataSource
+        .getRepository(repository)
+        .findOne({
+          where: {
+            [pathToProperty ? pathToProperty : validationArguments.property]:
+              value,
+            // pathToProperty ? value?.[pathToProperty] : value,
+          },
+        });
 
-    return Boolean(entity);
+      return Boolean(entity);
+    } catch (err) {
+      return false;
+    }
   }
 }

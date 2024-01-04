@@ -1,8 +1,9 @@
-import { User } from '../../models/users/entities/user.entity';
+import { EUserRole } from 'src/models/users/types/user-roles.enum';
+import { EUserStatus } from 'src/models/users/types/user-statuses.enum';
 
 export interface IUserPayload {
-  id: User['id'];
-  email: User['email'];
-  role: User['role'];
-  status: User['status'];
+  id: string;
+  email: string;
+  role: EUserRole;
+  status: EUserStatus;
 }

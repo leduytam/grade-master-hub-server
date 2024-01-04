@@ -52,9 +52,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             mkdir -p /var/www/grade-master-hub-server
-            mkdir -p /var/www/grade-master-hub-server/prod-volumes
-            mkdir -p /var/www/grade-master-hub-server/prod-volumes/db-data
-            mkdir -p /var/www/grade-master-hub-server/prod-volumes/pgadmin-data
+            mkdir -p /var/www/grade-master-hub-server/prod-volume
+            mkdir -p /var/www/grade-master-hub-server/prod-volume/db-data
+            mkdir -p /var/www/grade-master-hub-server/prod-volume/pgadmin-data
             cd /var/www/grade-master-hub-server
             export $(cat .env.production) && docker stack deploy -c prod.swarm.yml grade-master-hub --with-registry-auth
             rm .env.production prod.swarm.yml
