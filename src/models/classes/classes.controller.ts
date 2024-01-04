@@ -469,6 +469,24 @@ export class ClassesController {
       role: EClassRole.TEACHER,
     });
 
-    return this.reviewsService.findAllWithPaginate(query);
+    return this.reviewsService.findAllWithPaginate(classId, query);
+  }
+
+  @Get(':classId/my-reviews')
+  @Auth(EUserRole.USER)
+  async getMyReviews(
+    @Req() req: Request,
+    @ParamUUIDValidation('classId', Class) classId: string,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
+    await this.classesService.validatePermission(req.user.id, classId, {
+      role: EClassRole.STUDENT,
+    });
+
+    return this.reviewsService.findAllMyReviewsWithPaginate(
+      req.user.id,
+      classId,
+      query,
+    );
   }
 }

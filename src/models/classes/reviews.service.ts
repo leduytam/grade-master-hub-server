@@ -159,7 +159,10 @@ export class ReviewsService {
     return this.repo.find(options);
   }
 
-  async findAllWithPaginate(query: PaginateQuery): Promise<Paginated<Review>> {
+  async findAllWithPaginate(
+    classId: string,
+    query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
     return paginate(query, this.repo, {
       relations: [
         'grade',
@@ -168,6 +171,53 @@ export class ReviewsService {
         'requester',
         'endedBy',
       ],
+      where: {
+        classEntity: {
+          id: classId,
+        },
+      },
+      sortableColumns: ['createdAt', 'updatedAt'],
+      defaultSortBy: [['updatedAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ, FilterSuffix.NOT],
+      },
+    });
+  }
+
+  async findAllMyReviewsWithPaginate(
+    userId: string,
+    classId: string,
+    query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
+    const student = await this.classesService.getMappedStudentId(
+      userId,
+      classId,
+    );
+
+    if (!student || !student.studentId) {
+      throw new BadRequestException(
+        'You are not mapped to a student in this class',
+      );
+    }
+
+    return paginate(query, this.repo, {
+      relations: [
+        'grade',
+        'grade.composition',
+        'grade.student',
+        'requester',
+        'endedBy',
+      ],
+      where: {
+        classEntity: {
+          id: classId,
+        },
+        grade: {
+          student: {
+            id: student.studentId,
+          },
+        },
+      },
       sortableColumns: ['createdAt', 'updatedAt'],
       defaultSortBy: [['updatedAt', 'DESC']],
       filterableColumns: {
@@ -213,6 +263,7 @@ export class ReviewsService {
               },
               student: {
                 id: review.grade.student.id,
+                classEntityId: review.grade.composition.classEntity.id,
               },
             },
             {
