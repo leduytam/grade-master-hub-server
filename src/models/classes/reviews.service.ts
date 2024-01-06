@@ -169,6 +169,7 @@ export class ReviewsService {
         'grade.composition',
         'grade.student',
         'requester',
+        'requester.avatar',
         'endedBy',
       ],
       where: {
@@ -207,6 +208,7 @@ export class ReviewsService {
         'grade.student',
         'requester',
         'endedBy',
+        'requester.avatar',
       ],
       where: {
         classEntity: {
@@ -419,6 +421,7 @@ export class ReviewsService {
       },
       relations: [
         'requester',
+        'requester.avatar',
         'grade',
         'grade.composition',
         'grade.composition.classEntity',
@@ -518,6 +521,7 @@ export class ReviewsService {
       },
       relations: [
         'requester',
+        'requester.avatar',
         'grade',
         'grade.composition',
         'grade.composition.classEntity',
