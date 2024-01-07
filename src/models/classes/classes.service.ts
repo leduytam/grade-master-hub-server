@@ -203,6 +203,7 @@ export class ClassesService {
     return paginate(query, this.repo, {
       relations: ['owner', 'owner.avatar'],
       sortableColumns: ['createdAt', 'updatedAt'],
+      searchableColumns: ['name'],
       defaultSortBy: [['updatedAt', 'DESC']],
       where: {
         owner: {
@@ -231,6 +232,7 @@ export class ClassesService {
     return paginate(query, qb, {
       sortableColumns: ['createdAt', 'updatedAt'],
       defaultSortBy: [['updatedAt', 'DESC']],
+      searchableColumns: ['name'],
     });
   }
 
