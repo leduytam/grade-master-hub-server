@@ -33,9 +33,6 @@ export class NotificationsService {
     query: PaginateQuery,
   ): Promise<Paginated<Notification>> {
     return paginate(query, this.repo, {
-      relations: {
-        user: true,
-      },
       where: {
         user: {
           id: userId,
