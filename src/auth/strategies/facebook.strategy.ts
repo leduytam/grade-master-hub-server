@@ -27,6 +27,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
         infer: true,
       })}/v1/auth/facebook/callback`,
       scope: ['email', 'public_profile'],
+      profileFields: ['id', 'displayName', 'email'],
     });
   }
 
@@ -36,11 +37,12 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     profile: Profile,
     cb: (error: any, user?: any, info?: any) => void,
   ) {
-    const { id, displayName } = profile;
+    const { id, displayName, emails } = profile;
+
+    const email = emails?.length > 0 ? emails[0].value : null;
+
     const user = await this.usersService.findOne({
-      where: {
-        facebookId: id,
-      },
+      where: email ? { email } : { facebookId: id },
     });
 
     if (!user) {
@@ -50,6 +52,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
         firstName: nameWords[0],
         lastName: displayName.split(' ')[nameWords.length - 1],
         facebookId: id,
+        email,
         provider: EUserProvider.FACEBOOK,
         role: EUserRole.USER,
         status: EUserStatus.ACTIVE,
