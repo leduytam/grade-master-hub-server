@@ -458,6 +458,7 @@ export class ReviewsService {
           },
           level: 1,
         },
+        relations: ['user'],
       });
 
       // send notification to the requester if the comment is not from the requester
@@ -602,6 +603,7 @@ export class ReviewsService {
             id: commentId,
           },
         },
+        relations: ['user'],
       });
 
       const repliers = replies
