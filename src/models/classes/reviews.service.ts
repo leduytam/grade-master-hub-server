@@ -375,6 +375,8 @@ export class ReviewsService {
   ): Promise<Paginated<ReviewComment>> {
     const qb = this.commentsRepo
       .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .where('comment.review = :reviewId', { reviewId })
       .orderBy('comment.createdAt', 'DESC');
 
