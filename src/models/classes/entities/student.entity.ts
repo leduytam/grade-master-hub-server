@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { User } from 'src/models/users/entities/user.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { Class } from './class.entity';
@@ -8,6 +8,12 @@ import { Grade } from './grade.entity';
 export class Student {
   @PrimaryColumn({ type: String })
   id: string;
+
+  @PrimaryColumn({ type: String })
+  @Exclude({
+    toPlainOnly: true,
+  })
+  classEntityId: string;
 
   @Column({ type: String })
   name: string;

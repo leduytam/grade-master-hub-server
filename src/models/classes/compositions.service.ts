@@ -82,6 +82,7 @@ export class CompositionsService {
           return this.gradeRepo.create({
             student: {
               id: student.id,
+              classEntityId: classId,
             },
             composition: {
               id: savedComposition.id,
@@ -349,6 +350,7 @@ export class CompositionsService {
       where: {
         id: compositionId,
       },
+      relations: ['classEntity'],
     });
 
     if (composition.finalized) {
@@ -418,6 +420,7 @@ export class CompositionsService {
             {
               student: {
                 id: record.student_id,
+                classEntityId: composition.classEntity.id,
               },
               composition: {
                 id: compositionId,
@@ -445,6 +448,13 @@ export class CompositionsService {
     studentId: string,
     grade: number,
   ): Promise<void> {
+    const composition = await this.findOne({
+      where: {
+        id: compositionId,
+      },
+      relations: ['classEntity'],
+    });
+
     const gradeEntity = await this.gradeRepo.findOne({
       where: {
         composition: {
@@ -452,6 +462,7 @@ export class CompositionsService {
         },
         student: {
           id: studentId,
+          classEntityId: composition.classEntity.id,
         },
       },
       relations: ['composition', 'student'],

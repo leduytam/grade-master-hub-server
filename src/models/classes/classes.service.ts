@@ -203,6 +203,7 @@ export class ClassesService {
     return paginate(query, this.repo, {
       relations: ['owner', 'owner.avatar'],
       sortableColumns: ['createdAt', 'updatedAt'],
+      searchableColumns: ['name'],
       defaultSortBy: [['updatedAt', 'DESC']],
       where: {
         owner: {
@@ -231,6 +232,7 @@ export class ClassesService {
     return paginate(query, qb, {
       sortableColumns: ['createdAt', 'updatedAt'],
       defaultSortBy: [['updatedAt', 'DESC']],
+      searchableColumns: ['name'],
     });
   }
 
@@ -301,6 +303,7 @@ export class ClassesService {
             },
             student: {
               id: student.id,
+              classEntityId: classId,
             },
           });
         });
@@ -778,6 +781,7 @@ export class ClassesService {
     await this.studentRepo.update(
       {
         id: body.studentId,
+        classEntityId: classId,
       },
       {
         user: {
@@ -814,6 +818,7 @@ export class ClassesService {
 
     const student = await this.studentRepo.findOne({
       where: {
+        classEntityId: classId,
         classEntity: {
           id: classId,
         },
@@ -827,6 +832,7 @@ export class ClassesService {
       await this.studentRepo.update(
         {
           id: student.id,
+          classEntityId: classId,
         },
         {
           user: null,
@@ -850,6 +856,11 @@ export class ClassesService {
       order: {
         compositions: {
           order: 'ASC',
+          grades: {
+            student: {
+              id: 'ASC',
+            },
+          },
         },
       },
     });
@@ -975,7 +986,7 @@ export class ClassesService {
       .where('composition.classEntity = :classId', {
         classId,
       })
-      .andWhere('grade.student = :studentId', {
+      .andWhere('grade.student_id = :studentId', {
         studentId,
       })
       .orderBy('composition.order', 'ASC')
@@ -1013,6 +1024,7 @@ export class ClassesService {
   ): Promise<DeleteResult> {
     return await this.studentRepo.delete({
       id: studentId,
+      classEntityId: classId,
       classEntity: {
         id: classId,
       },

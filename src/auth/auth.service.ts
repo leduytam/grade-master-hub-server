@@ -93,6 +93,16 @@ export class AuthService {
   }
 
   async refresh(userPayload: IUserPayload) {
+    const user = await this.usersService.findOne({
+      where: {
+        id: userPayload.id,
+      },
+    });
+
+    if (!user || user.status !== EUserStatus.ACTIVE) {
+      throw new UnauthorizedException();
+    }
+
     const payload: IJwtPayload = {
       sub: userPayload.id,
       email: userPayload.email,

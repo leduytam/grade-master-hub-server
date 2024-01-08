@@ -159,7 +159,48 @@ export class ReviewsService {
     return this.repo.find(options);
   }
 
-  async findAllWithPaginate(query: PaginateQuery): Promise<Paginated<Review>> {
+  async findAllWithPaginate(
+    classId: string,
+    query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
+    return paginate(query, this.repo, {
+      relations: [
+        'grade',
+        'grade.composition',
+        'grade.student',
+        'requester',
+        'requester.avatar',
+        'endedBy',
+      ],
+      where: {
+        classEntity: {
+          id: classId,
+        },
+      },
+      sortableColumns: ['createdAt', 'updatedAt'],
+      defaultSortBy: [['updatedAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ, FilterSuffix.NOT],
+      },
+    });
+  }
+
+  async findAllMyReviewsWithPaginate(
+    userId: string,
+    classId: string,
+    query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
+    const student = await this.classesService.getMappedStudentId(
+      userId,
+      classId,
+    );
+
+    if (!student || !student.studentId) {
+      throw new BadRequestException(
+        'You are not mapped to a student in this class',
+      );
+    }
+
     return paginate(query, this.repo, {
       relations: [
         'grade',
@@ -167,7 +208,18 @@ export class ReviewsService {
         'grade.student',
         'requester',
         'endedBy',
+        'requester.avatar',
       ],
+      where: {
+        classEntity: {
+          id: classId,
+        },
+        grade: {
+          student: {
+            id: student.studentId,
+          },
+        },
+      },
       sortableColumns: ['createdAt', 'updatedAt'],
       defaultSortBy: [['updatedAt', 'DESC']],
       filterableColumns: {
@@ -213,6 +265,7 @@ export class ReviewsService {
               },
               student: {
                 id: review.grade.student.id,
+                classEntityId: review.grade.composition.classEntity.id,
               },
             },
             {
@@ -322,6 +375,8 @@ export class ReviewsService {
   ): Promise<Paginated<ReviewComment>> {
     const qb = this.commentsRepo
       .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .where('comment.review = :reviewId', { reviewId })
       .orderBy('comment.createdAt', 'DESC');
 
@@ -348,6 +403,8 @@ export class ReviewsService {
   ): Promise<Paginated<ReviewComment>> {
     const qb = this.commentsRepo
       .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .where('comment.parent = :commentId', { commentId })
       .orderBy('comment.createdAt', 'DESC');
 
@@ -368,6 +425,7 @@ export class ReviewsService {
       },
       relations: [
         'requester',
+        'requester.avatar',
         'grade',
         'grade.composition',
         'grade.composition.classEntity',
@@ -404,6 +462,7 @@ export class ReviewsService {
           },
           level: 1,
         },
+        relations: ['user'],
       });
 
       // send notification to the requester if the comment is not from the requester
@@ -467,6 +526,7 @@ export class ReviewsService {
       },
       relations: [
         'requester',
+        'requester.avatar',
         'grade',
         'grade.composition',
         'grade.composition.classEntity',
@@ -547,6 +607,7 @@ export class ReviewsService {
             id: commentId,
           },
         },
+        relations: ['user'],
       });
 
       const repliers = replies

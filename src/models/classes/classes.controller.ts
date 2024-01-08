@@ -113,7 +113,7 @@ export class ClassesController {
     return this.classesService.update(classId, body);
   }
 
-  @Delete(':id')
+  @Patch(':id/soft-delete')
   @Auth(EUserRole.ADMIN)
   async softDelete(
     @ParamUUIDValidation('id', Class) classId: string,
@@ -124,7 +124,7 @@ export class ClassesController {
   @Patch(':id/restore')
   @Auth(EUserRole.ADMIN)
   async restore(
-    @ParamUUIDValidation('id', Class) classId: string,
+    @ParamUUIDValidation('id', Class, true) classId: string,
   ): Promise<void> {
     await this.classesService.restore(classId);
   }
@@ -469,6 +469,24 @@ export class ClassesController {
       role: EClassRole.TEACHER,
     });
 
-    return this.reviewsService.findAllWithPaginate(query);
+    return this.reviewsService.findAllWithPaginate(classId, query);
+  }
+
+  @Get(':classId/my-reviews')
+  @Auth(EUserRole.USER)
+  async getMyReviews(
+    @Req() req: Request,
+    @ParamUUIDValidation('classId', Class) classId: string,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Review>> {
+    await this.classesService.validatePermission(req.user.id, classId, {
+      role: EClassRole.STUDENT,
+    });
+
+    return this.reviewsService.findAllMyReviewsWithPaginate(
+      req.user.id,
+      classId,
+      query,
+    );
   }
 }
